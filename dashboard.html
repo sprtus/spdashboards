@@ -1,0 +1,345 @@
+<div id="dashboard">
+    <div class="loading">Loading&hellip;</div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/1.12.3/jquery.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.13.0/moment.min.js"></script>
+
+<style type="text/css">
+
+/* projects list */
+#dashboard, #dashboard * {
+    box-sizing: border-box;
+}
+.projects-list {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+.projects-list li {
+    padding: 10px;
+}
+.projects-list li + li {
+    margin-top: 20px;
+}
+@media (min-width: 960px){
+    .projecst-list:after {
+        content: "";
+        display: block;
+        clear: both;
+    }
+    .projects-list li {
+        width: 50%;
+        float: left;
+    }
+    .projects-list li + li {
+        margin-top: 0;
+    }
+}
+
+/* projects */
+.project-item {
+    position: relative;
+    cursor: pointer;
+    height: 400px;
+}
+.project-item-tile-front {
+    background: #45c2e7;
+    height: 400px;
+    color: #fff;
+    padding: 40px;
+}
+.project-item-tile-back {
+    height: 400px;
+    background: #f5f5f5;
+    color: #999;
+    border-top: 4px solid #45c2e7;
+}
+
+/* featured projects */
+.project-item-tile.featured .project-item-tile-front {
+    background-color: #E62F66;
+}
+.project-item-tile.featured .project-item-tile-back {
+    border-top-color: #E62F66;
+}
+
+/* project content */
+.project-item h3 {
+    font-family: 'Helvetica Neue', sans-serif;
+    color: #fff;
+    font-size: 40px;
+    font-weight: 200;
+    line-height: 1;
+    margin: 0 0 20px 0;
+}
+.project-item-date {
+    font-family: 'Helvetica Neue', sans-serif;
+    font-size: 18px;
+    font-weight: 300;
+    position: absolute;
+    bottom: 0;
+    right: 0;
+    left: 0;
+    padding: 10px;
+    background: rgba(255, 255, 255, 0.15);
+    text-align: right;
+}
+.project-item-description {
+    padding: 80px;
+    color: #999;
+    font-family: 'Helvetica Neue', sans-serif;
+    font-size: 20px;
+    font-weight: 300;
+    line-height: 1.4;
+}
+
+/* card flip */
+.project-item {
+    perspective: 1000;
+    transform-style: preserve-3d;
+}
+.project-item-tile > * {
+    backface-visibility: hidden;
+    transition: transform 0.4s linear;
+}
+.project-item-tile-front {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    overflow: hidden;
+    z-index: 2;
+    transform: rotateY(0deg);
+}
+.flip .project-item-tile-front {
+    transform: rotateY(180deg);
+}
+.project-item-tile-back {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    overflow: hidden;
+    transform: rotateY(-180deg);
+}
+.flip .project-item-tile-back {
+    transform: rotateY(0deg);
+}
+
+/* donuts */
+.donut {
+    position: relative;
+    width: 1em;
+    height: 1em;
+    margin: auto;
+    text-align: center;
+    font-size: 200px;
+}
+.donut-meter {
+    border: 0.2em rgba(255, 255, 255, 0.25) solid;
+    position: absolute;
+    width: 1em;
+    height: 1em;
+    border-radius: 0.5em;
+}
+.donut-meter-fill1 {
+    position: absolute;
+    width: 1em;
+    height: 1em;
+    clip: rect(0, 1em, 1em, 0.5em);
+}
+.donut-meter-fill1 > span {
+    display: block;
+    position: absolute;
+    border: 0.2em solid #fff;
+    width: 1em;
+    height: 1em;
+    border-radius: 0.5em;
+    clip: rect(0, 0.5em, 1em, 0);
+}
+.donut.big .donut-meter-fill1 > span {
+    transform: rotate(180deg) !important;
+}
+.donut-meter-fill2 {
+    display: none;
+    position: absolute;
+    width: 1em;
+    height: 1em;
+    clip: rect(0, 0.5em, 1em, 0);
+}
+.donut.big .donut-meter-fill2 {
+    display: block;
+}
+.donut-meter-fill2 > span {
+    display: block;
+    position: absolute;
+    border: 0.2em solid #fff;
+    width: 1em;
+    height: 1em;
+    border-radius: 0.5em;
+    clip: rect(0, 0.5em, 1em, 0);
+}
+.donut-meter-measure {
+    font-family: 'Helvetica Neue', sans-serif;
+    font-weight: 200;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 3em;
+    height: 1.5em;
+    line-height: 1.5em;
+    margin: -0.75em 0 0 -1.5em;
+    font-size: 24px;
+    text-align: center;
+    color: #fff;
+}
+
+</style>
+
+<script>
+
+// bones data
+var bones = {
+
+    // get site
+    site: {
+        host: window.location.protocol + '//' + window.location.host,
+        collection: {
+            url: _spPageContextInfo.siteAbsoluteUrl.replace(/^\/|\/$/g, ''),
+            relative: _spPageContextInfo.siteServerRelativeUrl.replace(/^\/|\/$/g, '')
+        },
+        web: {
+            url: _spPageContextInfo.webAbsoluteUrl.replace(/^\/|\/$/g, ''),
+            relative: _spPageContextInfo.webServerRelativeUrl.replace(/^\/|\/$/g, ''),
+            title: _spPageContextInfo.webTitle,
+            logo: _spPageContextInfo.webLogoUrl
+        }
+    },
+
+    // get page
+    page: {
+        id: _spPageContextInfo.pageItemId,
+        physical: _spPageContextInfo.serverRequestPath,
+        title: _spPageContextInfo.webTitle,
+        language: _spPageContextInfo.currentLanguage,
+        editmode: $('#MSOLayout_InDesignMode').val() == '1'
+    },
+
+    // get user
+    user: {
+        id: _spPageContextInfo.userId,
+        key: _spPageContextInfo.systemUserKey
+    },
+
+    // form digest
+    digest: $('#__REQUESTDIGEST').val()
+
+};
+
+// dashboard
+var dashboard = $('#dashboard');
+
+// get list data
+$.ajax({
+    url: bones.site.web.url + "/_api/web/lists/GetByTitle('Projects')/items?$select=Title,Description,StartDate,EndDate,PercentComplete,FeaturedProject&$orderby=StartDate+asc",
+    method: 'GET',
+    headers: {
+        'accept': 'application/json;odata=verbose',
+        'X-RequestDigest': bones.digest
+    },
+    success: function(data){
+
+        // clear loading
+        dashboard.empty();
+
+        // have items?
+        if(data.d.results.length > 0){
+
+            // <ul>
+            var ul = $('<ul class="projects-list"/>');
+
+            // each list item
+            $.each(data.d.results, function(i, item){
+
+                // <li>
+                var li = $('<li/>');
+
+                // item content
+                var projectItem = $('<div class="project-item" />');
+                var project = $('<div class="project-item-tile" />');
+                var front = $('<div class="project-item-tile-front" />');
+                var back = $('<div class="project-item-tile-back" />');
+
+                // featured?
+                if(item.FeaturedProject){
+                    project.addClass('featured');
+                }
+
+                // title
+                front.append('<h3>' + item.Title + '</h3>');
+
+                // dates
+                var datestring = moment(item.StartDate).format('MMM, D, YYYY');
+                if(item.StartDate != item.EndDate){
+                    datestring += ' &mdash; ' + moment(item.EndDate).format('MMM, D, YYYY');
+                }
+                front.append('<div class="project-item-date">' + datestring + '</div>');
+
+                // description
+                back.append('<div class="project-item-description">' + item.Description + '</div>');
+
+                // percent complete
+                var donut = $('<div class="donut"><div class="donut-meter"></div><div class="donut-meter-fill1"><span style="transform:rotate(356deg);"></span></div><div class="donut-meter-fill2"><span style="transform:rotate(356deg);"></span></div><div class="donut-meter-measure">' + Math.round(item.PercentComplete * 100) + '%</div></div>');
+
+                // rotate
+                var degrees = Math.round(360 * item.PercentComplete);
+                donut.find('.donut-meter-fill1 > span').css('transform', 'rotate(' + degrees + 'deg)');
+                if(degrees > 180){
+                    donut.addClass('big').find('.donut-meter-fill2 > span').css('transform', 'rotate(' + degrees + 'deg)');
+                }
+
+                // add donut to project
+                front.append(donut);
+
+                // flip
+                projectItem.on('click', function(e){
+                    $(this).toggleClass('flip');
+                });
+
+                // add item to <li>
+                project.append(front);
+                project.append(back);
+                projectItem.append(project);
+                li.append(projectItem);
+
+                // add <li> to <ul>
+                ul.append(li);
+
+            });
+
+            // add <ul> to dashboard
+            dashboard.append(ul);
+
+        }
+
+        // no items
+        else{
+            dashboard.append('<div class="empty">No projects.</div>');
+        }
+
+    },
+    error: function(xhr, status, message){
+
+        // clear loading
+        dashboard.empty();
+
+        // error message
+        dashboard.append('<div class="error"><strong>Oh no!</strong> We encountered an error (' + message + '). Please try that again in a few moments.</div>');
+
+    }
+});
+
+</script>
